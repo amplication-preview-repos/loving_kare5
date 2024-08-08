@@ -1,0 +1,126 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model School {
+  academicYears AcademicYear[]
+  createdAt     DateTime       @default(now())
+  id            String         @id @default(cuid())
+  name          String?
+  updatedAt     DateTime       @updatedAt
+  users         User[]
+}
+
+model Term {
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id])
+  academicYearId String?
+  createdAt      DateTime      @default(now())
+  id             String        @id @default(cuid())
+  name           String?
+  updatedAt      DateTime      @updatedAt
+}
+
+model AcademicYear {
+  createdAt DateTime @default(now())
+  id        String   @id @default(cuid())
+  school    School?  @relation(fields: [schoolId], references: [id])
+  schoolId  String?
+  terms     Term[]
+  updatedAt DateTime @updatedAt
+  year      Int?
+}
+
+model Holiday {
+  calendar    Calendar? @relation(fields: [calendarId], references: [id])
+  calendarId  String?
+  createdAt   DateTime  @default(now())
+  date        DateTime?
+  description String?
+  id          String    @id @default(cuid())
+  title       String?
+  updatedAt   DateTime  @updatedAt
+}
+
+model Section {
+  createdAt DateTime @default(now())
+  grade     Grade?   @relation(fields: [gradeId], references: [id])
+  gradeId   String?
+  id        String   @id @default(cuid())
+  name      String?
+  updatedAt DateTime @updatedAt
+  users     User[]
+}
+
+model Grade {
+  createdAt DateTime  @default(now())
+  id        String    @id @default(cuid())
+  name      String?
+  sections  Section[]
+  updatedAt DateTime  @updatedAt
+  users     User[]
+}
+
+model Calendar {
+  createdAt DateTime               @default(now())
+  date      DateTime?
+  event     Event?                 @relation(name: "CalendarsOnEvent", fields: [eventId], references: [id])
+  eventId   String?
+  events    Event[]                @relation(name: "CalendarOnEvents")
+  holidays  Holiday[]
+  id        String                 @id @default(cuid())
+  typeField EnumCalendarTypeField?
+  updatedAt DateTime               @updatedAt
+}
+
+model Subject {
+  createdAt DateTime @default(now())
+  id        String   @id @default(cuid())
+  name      String?
+  updatedAt DateTime @updatedAt
+}
+
+model Event {
+  calendar    Calendar?  @relation(name: "CalendarOnEvents", fields: [calendarId], references: [id])
+  calendarId  String?
+  calendars   Calendar[] @relation(name: "CalendarsOnEvent")
+  createdAt   DateTime   @default(now())
+  description String?
+  endTime     DateTime?
+  id          String     @id @default(cuid())
+  location    String?
+  startTime   DateTime?
+  title       String?
+  updatedAt   DateTime   @updatedAt
+}
+
+model User {
+  createdAt DateTime      @default(now())
+  email     String?       @unique
+  firstName String?
+  grade     Grade?        @relation(fields: [gradeId], references: [id])
+  gradeId   String?
+  id        String        @id @default(cuid())
+  lastName  String?
+  password  String
+  role      EnumUserRole?
+  roles     Json
+  school    School?       @relation(fields: [schoolId], references: [id])
+  schoolId  String?
+  section   Section?      @relation(fields: [sectionId], references: [id])
+  sectionId String?
+  updatedAt DateTime      @updatedAt
+  username  String        @unique
+}
+
+enum EnumCalendarTypeField {
+  Option1
+}
+
+enum EnumUserRole {
+  Option1
+}
